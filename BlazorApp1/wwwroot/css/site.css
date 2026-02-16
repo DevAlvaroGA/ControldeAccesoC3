@@ -1,0 +1,151 @@
+﻿body {
+    margin: 0;
+    background: #0f172a;
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+}
+
+/* Layout general */
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background: #111827;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+}
+
+    .sidebar.collapsed {
+        width: 70px;
+    }
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+.manual-btn {
+    background: #2563eb;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    margin-top: auto;
+}
+
+/* Main */
+.main-area {
+    flex: 1;
+    padding: 30px;
+    position: relative;
+}
+
+.top-title {
+    margin-bottom: 30px;
+}
+
+/* Lista */
+.student-list {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 16px;
+    max-width: 500px;
+}
+
+.student-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    margin-top: 10px;
+    background: #0f172a;
+    border-radius: 10px;
+}
+
+    .student-item img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+    }
+
+/* Overlay */
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Card */
+.highlight-card {
+    background: #1e293b;
+    padding: 40px;
+    border-radius: 20px;
+    width: 600px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+    animation: scaleIn 0.4s ease;
+}
+
+    .highlight-card img {
+        width: 260px;
+        height: 260px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+    }
+
+.status-badge {
+    margin-top: 20px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+    .status-badge.ok {
+        background: #22c55e;
+    }
+
+/* Animaciones */
+@keyframes scaleIn {
+    from {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

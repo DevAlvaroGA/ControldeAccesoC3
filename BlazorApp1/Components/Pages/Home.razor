@@ -1,0 +1,96 @@
+﻿@page "/"
+
+@code {
+    private bool showHighlight = true;
+    private bool menuCollapsed = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(30000); // 30 segundos
+        showHighlight = false;
+    }
+
+    void ToggleMenu()
+    {
+        menuCollapsed = !menuCollapsed;
+    }
+}
+
+<div class="app-container">
+
+    <!-- Sidebar -->
+    <div class="sidebar @(menuCollapsed ? "collapsed" : "")">
+
+        <div class="sidebar-header">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png" class="logo" />
+            @if (!menuCollapsed)
+            {
+                <span class="ms-2 fw-bold">CIFP Carlos III</span>
+            }
+        </div>
+
+        <button class="menu-toggle" @onclick="ToggleMenu">
+            ☰
+        </button>
+
+        @if (!menuCollapsed)
+        {
+            <button class="manual-btn" disabled>
+                Añadir alumno manual
+            </button>
+        }
+
+    </div>
+
+    <!-- Main -->
+    <div class="main-area">
+
+        <div class="top-title">
+            <h3>Control de acceso - CIFP Carlos III</h3>
+        </div>
+
+        <!-- Lista siempre visible -->
+        <div class="student-list">
+
+            <h5>Alumnos dentro del aula</h5>
+
+            <div class="student-item">
+                <img src="https://i.pravatar.cc/100?img=1" />
+                <div>
+                    <div class="fw-semibold">Alejandro García</div>
+                    <small>2º ESO - Grupo B</small>
+                </div>
+            </div>
+
+            <div class="student-item">
+                <img src="https://i.pravatar.cc/100?img=2" />
+                <div>
+                    <div class="fw-semibold">María Rodríguez</div>
+                    <small>4º ESO - Grupo A</small>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Card flotante -->
+        @if (showHighlight)
+        {
+            <div class="overlay">
+                <div class="highlight-card">
+
+                    <img src="https://i.pravatar.cc/300" />
+
+                    <h2 class="fw-bold">Juan Andrés Pérez</h2>
+                    <p>NRE: 1284759</p>
+                    <p class="text-info">2º Bachillerato B</p>
+
+                    <div class="status-badge ok">
+                        ACCESO CONCEDIDO
+                    </div>
+
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
