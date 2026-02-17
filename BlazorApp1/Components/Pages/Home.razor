@@ -2,167 +2,251 @@
 
 @code {
 
-    private bool showHighlight = false;
-    private bool tornoConectado = true;
-    private bool sidebarCollapsed = false;
-    private string searchText = "";
+	private bool tornoConectado = true;
+	private bool sidebarCollapsed = false;
+	private string searchText = "";
 
-    private Alumno? alumnoActivo;
+	private int contador = 1;
+	private string? ultimaHoraEntrada;
 
-    private Alumno alumnoDemo = new(
-        "Juan Andrés Pérez García",
-        "2º Bachillerato B",
-        "1284759",
-        "men/22"
-    );
+	private bool mostrarConfirmacion = false;
+	private Alumno? alumnoAEliminar;
 
-    private List<Alumno> alumnos = new()
-    {
-        new("Alejandro García","2º ESO - Grupo B","123456","men/12"),
-        new("María Rodríguez","4º ESO - Grupo A","234567","women/32"),
-        new("Javier López","1º Bach - Ciencias","345678","men/45"),
-        new("Lucía Martínez","2º Bach - Letras","456789","women/44"),
-        new("Carlos Sánchez","3º ESO - Grupo C","567890","men/67"),
-        new("Adrián Molina","1º ESO - Grupo A","789012","men/34")
-    };
 
-    IEnumerable<Alumno> alumnosFiltrados =>
-        alumnos.Where(a =>
-            a.Nombre.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-            a.Nre.Contains(searchText));
+	private HashSet<string> filasExpandidas = new();
 
-    void SimularEntrada()
-    {
-        MostrarCard(alumnoDemo);
-    }
+	private List<Alumno> alumnos = new();
 
-    void VerDetalle(Alumno alumno)
-    {
-        MostrarCard(alumno);
-    }
+	private List<(string Nombre, string Curso, string Foto)> bancoAlumnos = new()
+	{
+		("Alejandro García","2º ESO - Grupo B","men/12"),
+		("María Rodríguez","4º ESO - Grupo A","women/32"),
+		("Javier López","1º Bach - Ciencias","men/45"),
+		("Lucía Martínez","2º Bach - Letras","women/44"),
+		("Carlos Sánchez","3º ESO - Grupo C","men/67"),
+		("Adrián Molina","1º ESO - Grupo A","men/34")
+	};
 
-    void MostrarCard(Alumno alumno)
-    {
-        alumnoActivo = alumno;
-        showHighlight = true;
+	IEnumerable<Alumno> alumnosFiltrados =>
+		alumnos.Where(a =>
+			a.Nombre.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+			a.Nre.Contains(searchText));
 
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(6000);
-            showHighlight = false;
-            await InvokeAsync(StateHasChanged);
-        });
-    }
+	void SimularEntrada()
+	{
+		var random = new Random();
+		var baseAlumno = bancoAlumnos[random.Next(bancoAlumnos.Count)];
 
-    public record Alumno(string Nombre, string Curso, string Nre, string Foto);
+		var nuevoAlumno = new Alumno(
+			baseAlumno.Nombre,
+			baseAlumno.Curso,
+			(100000 + contador).ToString(),
+			baseAlumno.Foto
+		);
+
+		contador++;
+		alumnos.Insert(0, nuevoAlumno);
+
+		ultimaHoraEntrada = DateTime.Now.ToString("HH:mm:ss");
+
+		ExpandirFila(nuevoAlumno.Nre);
+	}
+
+	void ToggleFila(string nre)
+	{
+		if (filasExpandidas.Contains(nre))
+			filasExpandidas.Remove(nre);
+		else
+			filasExpandidas.Add(nre);
+	}
+
+	void ExpandirFila(string nre)
+	{
+		filasExpandidas.Add(nre);
+
+		_ = Task.Run(async () =>
+		{
+			await Task.Delay(2500);
+			filasExpandidas.Remove(nre);
+			await InvokeAsync(StateHasChanged);
+		});
+	}
+
+	void SacarAlumno(Alumno alumno)
+	{
+		alumnoAEliminar = alumno;
+		mostrarConfirmacion = true;
+	}
+
+	void ConfirmarSalida()
+	{
+		if (alumnoAEliminar is not null)
+		{
+			alumnos.Remove(alumnoAEliminar);
+			filasExpandidas.Remove(alumnoAEliminar.Nre);
+			alumnoAEliminar = null;
+		}
+
+		mostrarConfirmacion = false;
+	}
+
+	void CancelarSalida()
+	{
+		mostrarConfirmacion = false;
+		alumnoAEliminar = null;
+	}
+
+	public record Alumno(string Nombre, string Curso, string Nre, string Foto);
 }
 
 <div class="layout">
 
-    <!-- Sidebar -->
-    <div class="sidebar @(sidebarCollapsed ? "collapsed" : "")">
+	<!-- SIDEBAR -->
+	<div class="sidebar @(sidebarCollapsed ? "collapsed" : "")">
 
-        <div class="logo-section">
-            <img src="https://imgs.search.brave.com/Ku6e6CDBYUay7SYWuC1BxuSYtvNWRFCvihnyTY5mMho/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9iaXNp/b25hcmlvcy5lcy93/cC1jb250ZW50L3Vw/bG9hZHMvTG9nby1D/YXJsb3MtSUlJLmpw/Zw" />
-        </div>
+		<div class="logo-section">
+			<img src="https://imgs.search.brave.com/Ku6e6CDBYUay7SYWuC1BxuSYtvNWRFCvihnyTY5mMho/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9iaXNp/b25hcmlvcy5lcy93/cC1jb250ZW50L3Vw/bG9hZHMvTG9nby1D/YXJsb3MtSUlJLmpw/Zw" />
+		</div>
 
-        <button class="menu-toggle" @onclick="() => sidebarCollapsed = !sidebarCollapsed">
-            <i class="bi bi-list"></i>
-        </button>
+		<button class="menu-toggle" @onclick="() => sidebarCollapsed = !sidebarCollapsed">
+			<i class="bi bi-list"></i>
+		</button>
 
-        <button class="btn btn-primary w-100 mb-3">
-            <i class="bi bi-person-plus"></i> Añadir alumno
-        </button>
+		<button class="btn btn-success w-100 mb-3"
+				@onclick="SimularEntrada">
+			<i class="bi bi-person-check-fill"></i> Simular entrada
+		</button>
 
-    </div>
+	</div>
 
-    <!-- MAIN -->
-    <div class="main">
+	<!-- MAIN -->
+	<div class="main">
 
-        <!-- HEADER -->
-        <div class="header-bar">
+		<!-- HEADER -->
+		<div class="header-bar">
 
-            <h3 class="titulo">Control de acceso</h3>
+			<h3 class="titulo">Control de acceso</h3>
 
-            <button class="btn btn-success btn-sm"
-                    @onclick="SimularEntrada">
-                <i class="bi bi-person-check"></i> Simular entrada
-            </button>
+			<!-- ESTADO TORNO A LA DERECHA -->
+			<div class="ms-auto d-flex align-items-center gap-3">
 
-            <div class="torno-mini">
-                <div class="led @(tornoConectado ? "" : "off")"></div>
-                @(tornoConectado ? "Torno conectado" : "Torno desconectado")
-                <button class="btn btn-sm btn-outline-secondary ms-2"
-                        @onclick="() => tornoConectado = !tornoConectado">
-                    Simular
-                </button>
-            </div>
+				@if (!string.IsNullOrEmpty(ultimaHoraEntrada))
+				{
+					<div class="text-muted small">
+						Última entrada: <strong>@ultimaHoraEntrada</strong>
+					</div>
+				}
 
-        </div>
+				<div class="torno-mini">
+					<div class="led @(tornoConectado ? "" : "off")"></div>
+					@(tornoConectado ? "Torno conectado" : "Torno desconectado")
+				</div>
 
-        <!-- MÉTRICAS -->
-        <div class="metricas">
-            <div class="card-metrica">
-                <strong>Alumnos dentro</strong>
-                <h4>@alumnos.Count</h4>
-            </div>
-            <div class="card-metrica">
-                <strong>Último acceso</strong>
-                <h6>@DateTime.Now.ToShortTimeString()</h6>
-            </div>
-        </div>
+				<button class="btn btn-sm btn-outline-secondary"
+						@onclick="() => tornoConectado = !tornoConectado">
+					<i class="bi bi-arrow-repeat"></i>
+				</button>
 
-        <!-- BUSCADOR -->
-        <div class="filtro-bar">
-            <input class="form-control"
-                   placeholder="Buscar alumno o NRE..."
-                   @bind="searchText" />
-        </div>
+			</div>
 
-        <!-- LISTA -->
-        <div class="lista-card">
+		</div>
 
-            @foreach (var alumno in alumnosFiltrados)
-            {
-                <div class="item">
+		<!-- MÉTRICAS -->
+		<div class="metricas">
+			<div class="card-metrica">
+				<strong>Alumnos dentro</strong>
+				<h4>@alumnos.Count</h4>
+			</div>
+		</div>
 
-                    <img src="@($"https://randomuser.me/api/portraits/{alumno.Foto}.jpg")" />
+		<!-- BUSCADOR -->
+		<div class="filtro-bar">
+			<input class="form-control"
+				   placeholder="Buscar alumno o NRE..."
+				   @bind="searchText" />
+		</div>
 
-                    <div class="info">
-                        <strong>@alumno.Nombre</strong>
-                        <small>@alumno.Curso | NRE: @alumno.Nre</small>
-                    </div>
+		<!-- LISTA -->
+		<div class="lista-card">
 
-                    <button class="icon-btn"
-                            title="Ver datos"
-                            @onclick="() => VerDetalle(alumno)">
-                        <i class="bi bi-eye-fill"></i>
-                    </button>
+			@if (!alumnos.Any())
+			{
+				<div class="text-center text-muted p-4">
+					<i class="bi bi-people fs-3"></i>
+					<p class="mt-2">No hay alumnos dentro del aula</p>
+				</div>
+			}
+			else
+			{
+				@foreach (var alumno in alumnosFiltrados)
+				{
+					var expandido = filasExpandidas.Contains(alumno.Nre);
 
-                </div>
-            }
+					<div class="item @(expandido ? "fila-activa" : "")">
 
-        </div>
+						<img src="@($"https://randomuser.me/api/portraits/{alumno.Foto}.jpg")" />
 
-    </div>
+						<div class="info">
+							<strong>@alumno.Nombre</strong>
+							<small>@alumno.Curso | NRE: @alumno.Nre</small>
+						</div>
+
+						<div class="d-flex gap-2">
+
+							<button class="icon-btn"
+									title="Ver"
+									@onclick="() => ToggleFila(alumno.Nre)">
+								<i class="bi bi-eye-fill"></i>
+							</button>
+
+							<button class="icon-btn"
+									title="Salida"
+									@onclick="() => SacarAlumno(alumno)">
+								<i class="bi bi-box-arrow-right"></i>
+							</button>
+
+						</div>
+
+					</div>
+				}
+			}
+
+			@if (mostrarConfirmacion && alumnoAEliminar is not null)
+			{
+				<div class="overlay">
+					<div class="card-grande" style="max-width:500px;">
+
+						<h4>Salida manual</h4>
+
+						<p class="mt-3">
+							¿Deseas sacar del aula a:
+							<strong>@alumnoAEliminar.Nombre</strong>?
+						</p>
+
+						<p class="text-muted">
+							NRE: @alumnoAEliminar.Nre <br />
+							@alumnoAEliminar.Curso
+						</p>
+
+						<div class="d-flex justify-content-center gap-3 mt-4">
+
+							<button class="btn btn-danger"
+									@onclick="ConfirmarSalida">
+								<i class="bi bi-check-circle"></i> Confirmar salida
+							</button>
+
+							<button class="btn btn-outline-secondary"
+									@onclick="CancelarSalida">
+								Cancelar
+							</button>
+
+						</div>
+
+					</div>
+				</div>
+			}
+
+		</div>
+
+	</div>
 </div>
-
-@if (showHighlight && alumnoActivo is not null)
-{
-    <div class="overlay">
-        <div class="card-grande">
-
-            <img src="@($"https://randomuser.me/api/portraits/{alumnoActivo.Foto}.jpg")" />
-
-            <h2>@alumnoActivo.Nombre</h2>
-            <p>NRE: @alumnoActivo.Nre</p>
-            <p>@alumnoActivo.Curso</p>
-
-            <div class="estado @(tornoConectado ? "ok" : "error")">
-                <i class="bi @(tornoConectado ? "bi-check-circle" : "bi-x-circle")"></i>
-                @(tornoConectado ? " ACCESO CONCEDIDO" : " ACCESO DENEGADO")
-            </div>
-
-        </div>
-    </div>
-}

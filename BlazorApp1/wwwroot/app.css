@@ -43,6 +43,9 @@ body {
 .main {
     flex: 1;
     padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 /* Header */
@@ -102,12 +105,13 @@ body {
 }
 
 .card-metrica {
-    flex: 1;
+    width: 220px;
     background: #ffffff;
     border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    padding: 15px 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
+
 
 /* Buscador */
 .filtro-bar {
@@ -116,10 +120,9 @@ body {
 
 /* Lista */
 .lista-card {
-    background: #f9fbfd;
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
 }
 
 .item {
@@ -230,3 +233,58 @@ body {
         transform: scale(1);
     }
 }
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px;
+    border-radius: 14px;
+    background: white;
+    margin-bottom: 14px;
+    min-height: 80px;
+    transition: all 0.5s cubic-bezier(.22,1,.36,1);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+}
+
+    .item img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        transition: all 0.5s ease;
+    }
+
+.info strong {
+    font-size: 16px;
+    transition: all 0.4s ease;
+}
+
+.info small {
+    font-size: 13px;
+    transition: all 0.4s ease;
+}
+
+/* ===== FILA EXPANDIDA ===== */
+
+.fila-activa {
+    min-height: 150px;
+    padding: 30px;
+    background: #e0f2fe;
+    box-shadow: 0 20px 60px rgba(37,99,235,0.25);
+}
+
+    .fila-activa img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .fila-activa .info strong {
+        font-size: 24px;
+    }
+
+    .fila-activa .info small {
+        font-size: 18px;
+    }
+
+
