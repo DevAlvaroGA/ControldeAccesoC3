@@ -1,96 +1,168 @@
 ﻿@page "/"
 
 @code {
-    private bool showHighlight = true;
-    private bool menuCollapsed = false;
 
-    protected override async Task OnInitializedAsync()
+    private bool showHighlight = false;
+    private bool tornoConectado = true;
+    private bool sidebarCollapsed = false;
+    private string searchText = "";
+
+    private Alumno? alumnoActivo;
+
+    private Alumno alumnoDemo = new(
+        "Juan Andrés Pérez García",
+        "2º Bachillerato B",
+        "1284759",
+        "men/22"
+    );
+
+    private List<Alumno> alumnos = new()
     {
-        await Task.Delay(30000); // 30 segundos
-        showHighlight = false;
+        new("Alejandro García","2º ESO - Grupo B","123456","men/12"),
+        new("María Rodríguez","4º ESO - Grupo A","234567","women/32"),
+        new("Javier López","1º Bach - Ciencias","345678","men/45"),
+        new("Lucía Martínez","2º Bach - Letras","456789","women/44"),
+        new("Carlos Sánchez","3º ESO - Grupo C","567890","men/67"),
+        new("Adrián Molina","1º ESO - Grupo A","789012","men/34")
+    };
+
+    IEnumerable<Alumno> alumnosFiltrados =>
+        alumnos.Where(a =>
+            a.Nombre.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+            a.Nre.Contains(searchText));
+
+    void SimularEntrada()
+    {
+        MostrarCard(alumnoDemo);
     }
 
-    void ToggleMenu()
+    void VerDetalle(Alumno alumno)
     {
-        menuCollapsed = !menuCollapsed;
+        MostrarCard(alumno);
     }
+
+    void MostrarCard(Alumno alumno)
+    {
+        alumnoActivo = alumno;
+        showHighlight = true;
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(6000);
+            showHighlight = false;
+            await InvokeAsync(StateHasChanged);
+        });
+    }
+
+    public record Alumno(string Nombre, string Curso, string Nre, string Foto);
 }
 
-<div class="app-container">
+<div class="layout">
 
     <!-- Sidebar -->
-    <div class="sidebar @(menuCollapsed ? "collapsed" : "")">
+    <div class="sidebar @(sidebarCollapsed ? "collapsed" : "")">
 
-        <div class="sidebar-header">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png" class="logo" />
-            @if (!menuCollapsed)
-            {
-                <span class="ms-2 fw-bold">CIFP Carlos III</span>
-            }
+        <div class="logo-section">
+            <img src="https://imgs.search.brave.com/Ku6e6CDBYUay7SYWuC1BxuSYtvNWRFCvihnyTY5mMho/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9iaXNp/b25hcmlvcy5lcy93/cC1jb250ZW50L3Vw/bG9hZHMvTG9nby1D/YXJsb3MtSUlJLmpw/Zw" />
         </div>
 
-        <button class="menu-toggle" @onclick="ToggleMenu">
-            ☰
+        <button class="menu-toggle" @onclick="() => sidebarCollapsed = !sidebarCollapsed">
+            <i class="bi bi-list"></i>
         </button>
 
-        @if (!menuCollapsed)
-        {
-            <button class="manual-btn" disabled>
-                Añadir alumno manual
-            </button>
-        }
+        <button class="btn btn-primary w-100 mb-3">
+            <i class="bi bi-person-plus"></i> Añadir alumno
+        </button>
 
     </div>
 
-    <!-- Main -->
-    <div class="main-area">
+    <!-- MAIN -->
+    <div class="main">
 
-        <div class="top-title">
-            <h3>Control de acceso - CIFP Carlos III</h3>
-        </div>
+        <!-- HEADER -->
+        <div class="header-bar">
 
-        <!-- Lista siempre visible -->
-        <div class="student-list">
+            <h3 class="titulo">Control de acceso</h3>
 
-            <h5>Alumnos dentro del aula</h5>
+            <button class="btn btn-success btn-sm"
+                    @onclick="SimularEntrada">
+                <i class="bi bi-person-check"></i> Simular entrada
+            </button>
 
-            <div class="student-item">
-                <img src="https://i.pravatar.cc/100?img=1" />
-                <div>
-                    <div class="fw-semibold">Alejandro García</div>
-                    <small>2º ESO - Grupo B</small>
-                </div>
-            </div>
-
-            <div class="student-item">
-                <img src="https://i.pravatar.cc/100?img=2" />
-                <div>
-                    <div class="fw-semibold">María Rodríguez</div>
-                    <small>4º ESO - Grupo A</small>
-                </div>
+            <div class="torno-mini">
+                <div class="led @(tornoConectado ? "" : "off")"></div>
+                @(tornoConectado ? "Torno conectado" : "Torno desconectado")
+                <button class="btn btn-sm btn-outline-secondary ms-2"
+                        @onclick="() => tornoConectado = !tornoConectado">
+                    Simular
+                </button>
             </div>
 
         </div>
 
-        <!-- Card flotante -->
-        @if (showHighlight)
-        {
-            <div class="overlay">
-                <div class="highlight-card">
+        <!-- MÉTRICAS -->
+        <div class="metricas">
+            <div class="card-metrica">
+                <strong>Alumnos dentro</strong>
+                <h4>@alumnos.Count</h4>
+            </div>
+            <div class="card-metrica">
+                <strong>Último acceso</strong>
+                <h6>@DateTime.Now.ToShortTimeString()</h6>
+            </div>
+        </div>
 
-                    <img src="https://i.pravatar.cc/300" />
+        <!-- BUSCADOR -->
+        <div class="filtro-bar">
+            <input class="form-control"
+                   placeholder="Buscar alumno o NRE..."
+                   @bind="searchText" />
+        </div>
 
-                    <h2 class="fw-bold">Juan Andrés Pérez</h2>
-                    <p>NRE: 1284759</p>
-                    <p class="text-info">2º Bachillerato B</p>
+        <!-- LISTA -->
+        <div class="lista-card">
 
-                    <div class="status-badge ok">
-                        ACCESO CONCEDIDO
+            @foreach (var alumno in alumnosFiltrados)
+            {
+                <div class="item">
+
+                    <img src="@($"https://randomuser.me/api/portraits/{alumno.Foto}.jpg")" />
+
+                    <div class="info">
+                        <strong>@alumno.Nombre</strong>
+                        <small>@alumno.Curso | NRE: @alumno.Nre</small>
                     </div>
 
+                    <button class="icon-btn"
+                            title="Ver datos"
+                            @onclick="() => VerDetalle(alumno)">
+                        <i class="bi bi-eye-fill"></i>
+                    </button>
+
                 </div>
-            </div>
-        }
+            }
+
+        </div>
 
     </div>
 </div>
+
+@if (showHighlight && alumnoActivo is not null)
+{
+    <div class="overlay">
+        <div class="card-grande">
+
+            <img src="@($"https://randomuser.me/api/portraits/{alumnoActivo.Foto}.jpg")" />
+
+            <h2>@alumnoActivo.Nombre</h2>
+            <p>NRE: @alumnoActivo.Nre</p>
+            <p>@alumnoActivo.Curso</p>
+
+            <div class="estado @(tornoConectado ? "ok" : "error")">
+                <i class="bi @(tornoConectado ? "bi-check-circle" : "bi-x-circle")"></i>
+                @(tornoConectado ? " ACCESO CONCEDIDO" : " ACCESO DENEGADO")
+            </div>
+
+        </div>
+    </div>
+}
