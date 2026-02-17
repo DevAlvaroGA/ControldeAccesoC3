@@ -105,17 +105,23 @@
 	<div class="sidebar @(sidebarCollapsed ? "collapsed" : "")">
 
 		<div class="logo-section">
-			<img src="https://imgs.search.brave.com/Ku6e6CDBYUay7SYWuC1BxuSYtvNWRFCvihnyTY5mMho/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9iaXNp/b25hcmlvcy5lcy93/cC1jb250ZW50L3Vw/bG9hZHMvTG9nby1D/YXJsb3MtSUlJLmpw/Zw" />
+			<img src="C3Logo.png" />
 		</div>
 
-		<button class="menu-toggle" @onclick="() => sidebarCollapsed = !sidebarCollapsed">
-			<i class="bi bi-list"></i>
+		<button class="menu-toggle"
+				@onclick="() => sidebarCollapsed = !sidebarCollapsed">
+			<i class="bi @(sidebarCollapsed ? "bi-chevron-right" : "bi-chevron-left")"></i>
 		</button>
 
-		<button class="btn btn-success w-100 mb-3"
-				@onclick="SimularEntrada">
-			<i class="bi bi-person-check-fill"></i> Simular entrada
+
+		<button class="btn btn-success w-100 mb-3" @onclick="SimularEntrada">
+			<i class="bi bi-person-check-fill"></i>
+			@if (!sidebarCollapsed)
+			{
+				<span> Simular entrada</span>
+			}
 		</button>
+
 
 	</div>
 
